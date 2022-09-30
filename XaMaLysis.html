@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML Tool</title>
+</head>
+<body>
+    
+    <form action="/" onsubmit="return false;" style="display:none; width: 350px; border: 2px solid #777777; padding: 16px; border-radius: 8px;">
+        <div>
+            <label for="xml-file">Select XML file:</label>
+            <input type="file" name="xml-file" id="xml-file">
+        </div>
+        <div style="text-align: center; margin-top: 16px;">
+            <button id="parse-xml">PARSE!</button>
+        </div>
+    </form>
+    <div>
+        <h2 id="parse-message"></h2>
+        
+        <div class="loader"></div>
+        
+        <style>
+            
+            .loader {
+                position: absolute;
+                opacity: 0;
+                transition: opacity 0.3s;
+                border: 3.2px solid #f3f3f3;
+                border-top: 3.2px solid #777;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                animation: spin 0.8s linear infinite;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+        </style>
+        
+    </div>
+    <div id="code-examples" style="display: none;">
+        <h3>Some examples:</h3>
+        <pre style="white-space: pre-wrap;">jQuery(xml).find('product').length
+
+jQuery(xml).find('uid').length
+
+jQuery(xml).find('mpn').length
+
+jQuery(xml).find('name').length
+
+jQuery(xml).find('link').length
+
+jQuery(xml).find('image').length
+
+jQuery(xml).find('category').length
+
+jQuery(xml).find('additional_image').length
+
+jQuery(xml).find('color').length
+
+jQuery(xml).find('price').length
+
+jQuery(xml).find('instock').length
+
+jQuery(xml).find('availability').length
+
+jQuery(xml).find('size').length
+
+jQuery(xml).find('manufacturer').length
+
+jQuery(xml).find('weight').length
+
+var elemsArr = [];
+jQuery(xml).find('product').each(function (idx, itm) {
+    if (jQuery(this).find('availability').length === 0) {
+        elemsArr.push(this);
+        console.log(jQuery(this).text());
+    }
+})
+
+var elemsArr = [];
+jQuery(xml).find('product').each(function (idx, itm) {
+    if (jQuery(this).find('availability').length === 0) {
+        elemsArr.push(this);
+        console.log(jQuery(this).html());
+    }
+})
+
+jQuery(xml).find('availability').get() // returns plain JS array containing all the matching elements (instead of the usual jQuery object that is "array-like" (it contains the said elements & has a length property but is not actually an array)
+
+jQuery.uniqueSort(jQuery(xml).find('availability')) // not sure what this does exactly but it didn't work as I expected - it returned all elements even thought they were the same & not unique...???
+
+jQuery.uniqueSort(jQuery(xml).find('availability').get()) // same as above but in array-form - it returned all elements even thought they were the same & not unique...???
+
+jQuery(xml).find('availability').get().map(function (e) {return jQuery(e).html();}) // returns an array with the html content from all the matching elements
+
+jQuery.uniqueSort(jQuery(xml).find('availability').get().map(function (e) {return jQuery(e).html();})) // for some reason, it returned an array with the html content from all the elements, which was the same & not unique (it was blank, i.e. = "")...???
+
+jQuery(xml).find('availability').get().map(function (e) {return jQuery(e).html()===''?'it\'s blank!':jQuery(e).html();}) // replace blank html content with "it's blank!", so as to test if uniqueSort will work as expected (below)
+
+jQuery.uniqueSort(jQuery(xml).find('availability').get().map(function (e) {return jQuery(e).html()===''?'it\'s blank!':jQuery(e).html();})) // this worked as expected! it returned an array with only one element, since all the DOM elements were empty strings ("") and they were replaced with "it's blank!" - so it looks like uniqueSort doesn't work with empty strings (and undefined - I checked)
+
+jQuery.uniqueSort(jQuery(xml).find('availability').get().filter(function (e) {return jQuery(e).html()==='';})) // returns all blank elements (with html content of "")
+
+jQuery(xml).find('availability').get().filter(function (e) {return jQuery(e).html()!=='';}) // filters out the blank elements (with html content of "")
+
+jQuery.uniqueSort(jQuery(xml).find('price').get().map(function (e) {return jQuery(e).html()===''?'it\'s blank!':jQuery(e).html();})) // returns all the prices that appear in the document - each one make only on appearance, even if it is duplicated in the document
+
+jQuery(xml).find('uid').get().map(function (e) {return jQuery(e).html()}).join('\n') // get string where each entry is on it's own line - for use with the duplicate line finder tool (https://www.somacon.com/p568.php)
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+<span style="color: green; font-weight: bold;">// get &lt;price&gt; elements sorted by ascending value (here ',' is used to separate the decimal part, so it is replaced to do the sorting):</span>
+jQuery(xml).find('price').get().sort(function (a, b) {
+    return (parseFloat(jQuery(a).text().replace(',', '.')) - parseFloat(jQuery(b).text().replace(',', '.')));
+}).map(function (ele) {
+    return jQuery(ele).text();
+});
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+<span style="color: green; font-weight: bold;">// find which skus don't have their character string show up in their respective image url link (thereby prohibiting these images to act as a source of the sku if they are found in the DOM instead of the actual sku):</span>
+jQuery(xml).find('product').get().filter(function (element) {
+    return (jQuery(element).find('id').html()) !== (jQuery(element).find('image').text().split('/').pop().match(/\d*\.\d*/)[0]);
+}).map(function (element) {return (jQuery(element).find('id').html()) + '\n' + (jQuery(element).find('image').text().split('/').slice(-2).join('/'));}).join('\n\n');
+
+<span style="color: green; font-weight: bold;">// same as above, only pretty printed to the console:</span>
+console.log(jQuery(xml).find('product').get().filter(function (element) {
+    return (jQuery(element).find('id').html()) !== (jQuery(element).find('image').text().split('/').pop().match(/\d*\.\d*/)[0]);
+}).map(function (element) {return (jQuery(element).find('id').html()) + '\n' + (jQuery(element).find('image').text().split('/').slice(-2).join('/'));}).join('\n\n'));
+
+<span style="color: green; font-weight: bold;">// use custom line counting/sorting code to count distinct line appearances in the (above from the) above string:</span>
+getLineCounts(jQuery(xml).find('product').get().filter(function (element) {
+    return (jQuery(element).find('id').html()) !== (jQuery(element).find('image').text().split('/').pop().match(/\d*\.\d*/)[0]);
+}).map(function (element) {return (jQuery(element).find('id').html()) + '\n' + (jQuery(element).find('image').text().split('/').slice(-2).join('/'));}).join('\n\n'));
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+<span style="color: green; font-weight: bold;">// get the number of times every tag appears in the document (here only from "&lt;product&gt;" & on down - i.e., not taking into account the tree above the &lt;product&gt; element(s)):</span>
+var tagCount = {};
+jQuery(xml).find('product *').each(function () {
+    if (this.tagName in tagCount) {
+        tagCount[this.tagName]++;
+    } else {
+        tagCount[this.tagName] = 1;
+    }
+});
+tagCount;
+
+
+<span style="color: green; font-weight: bold;">// use custom line counting/sorting code to count distinct appearances of each "product_id" tag - distinct in that the elements contents are unique:</span>
+getLineCounts(jQuery(xml).find('product').get().map(function (element) {return (jQuery(element).find('product_id').text());}).join('\n'), 0);
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+<span style="color: green; font-weight: bold;">// general "filter & count how many" template script (in this spicific case, it is to filter out any products that have the string "13098" in their "PRODUCTID" tag, and then filter out which one of those don't have a populated "variant_id" tag - then the results are displayed by their name, sorted by line instance occurance (in case there are many with the same value)):</span>
+getLineCounts (
+    jQuery(xml).find('product').get() // get all products
+        .filter(function (element) { // filter step 1
+            return (jQuery(element).find('PRODUCTID').text().trim().indexOf('13098')!==-1);
+        })
+        .filter(function (element) { // filter step 2
+            return (jQuery(element).find('variant_id').text().trim()==='');
+        })
+        .map(function (element) {
+            return (jQuery(element).find('name').text());
+        })
+        .join('\n')
+, 0);
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+<span style="color: green; font-weight: bold;">// match any non-ASCII characters in XML - quick-n-dirty but is useful for checking if an XML has language-specific entries (so if there's only one XML & site is available in multiple languages, perhaps cart must be self-contained due to different product names based on choesen language):</span>
+jQuery(xml).text().match(/[^\x00-\x7F]/g);
+</pre>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    
+    <script>
+        
+        jQuery("form").toggle("bounce", {times: 3}, 1000);
+        
+        var xmlStr;
+        var xml;
+        
+        jQuery("button#parse-xml").on("click", function () {
+            try {
+                jQuery("button#parse-xml").eq(0).prop("disabled", true);
+                jQuery("h2#parse-message").eq(0).text("Parsing...");
+                // jQuery("div#loading-image").css("opacity", "1");
+                jQuery("div.loader").css("opacity", "1");
+                var xmlFile = document.getElementById("xml-file").files[0];
+                console.log("file: " + xmlFile.name + " , type: " + xmlFile.type);
+                const div = document.createElement("div");
+                jQuery("body").get(0).appendChild(div);
+                const reader = new FileReader();
+                // reader.onload = (function(aDiv) { return function(e) { aDiv.innerHTML = e.target.result; }; })(div);
+                reader.addEventListener("load", function () {
+                    jQuery("button#parse-xml").eq(0).prop("disabled", false);
+                    jQuery("h2#parse-message").eq(0).text("Parsed file: " + xmlFile.name);
+                    // jQuery("div#loading-image").css("opacity", "0");
+                    jQuery("div.loader").css("opacity", "0");
+                    setTimeout(function () {
+                        jQuery("form").toggle("blind", "slow");
+                        jQuery("#code-examples").toggle("fade", "slow");
+                    }, 1000);
+                    xmlStr = reader.result;
+                    // console.log(xmlStr);
+                    xml = jQuery.parseXML(xmlStr);
+                });
+                reader.readAsText(xmlFile);
+            } catch (error) {
+                jQuery("button#parse-xml").eq(0).prop("disabled", false);
+                jQuery("h2#parse-message").eq(0).text("Error Occurred...Try again please...");
+                // jQuery("div#loading-image").css("opacity", "0");
+                jQuery("div.loader").css("opacity", "0");
+            }
+        });
+        
+        function getLineCounts(inputString, sortBy, format) {
+            console.log(getLineCountsString(inputString, sortBy, format));
+        }
+        
+        // sortBy === 0 -> sort-by-count
+        // sortBy === 1 -> sort-by-line
+        // format === "readable" -> output format is readable
+        // format === "csv" -> output fromat is csv
+        function getLineCountsString(inputString, sortBy, format) {
+            
+            var outputString = "";
+            var arrLines = inputString.split("\n");
+            var countLines = arrLines.length;
+            var arrUniqueLines = [];
+            
+            // Loop through lines and accumulate counts
+            for (var i = 0; i < countLines; i++) {
+                // Ignore trailing new-line (if there is one)
+                var currentLine = arrLines[i];
+                if (currentLine.substr(currentLine.length - 2, 2) == "\r\n") {
+                    currentLine = currentLine.substr(0, currentLine.length - 2);
+                }
+                if ( (currentLine.substr(currentLine.length - 1, 1) == "\n") || (currentLine.substr(currentLine.length - 1, 1) ) == "\r") {
+                    currentLine = currentLine.substr(0, currentLine.length - 1);
+                }
+                
+                // Count the lines
+                if (!arrUniqueLines[currentLine]) {
+                    arrUniqueLines[currentLine] = 1;
+                } else {
+                    arrUniqueLines[currentLine] += 1;
+                }
+            }
+            
+            if (format == 'csv') {
+                outputString = outputString + "COUNT,LINE" + "\n";
+            } else {
+                outputString = outputString + "COUNT    | LINE" + "\n";
+                outputString = outputString + "-----------------------------------------------------" + "\n";
+            }
+            
+            // Sort by count
+            var sortedLines = [];
+            for (var i in arrUniqueLines) {
+                sortedLines.push([arrUniqueLines[i], i]);
+            }
+            arrUniqueLines = null;
+            // Reverse sort by count
+            sortedLines.sort(function (a,b) {
+                if (sortBy == 0) {
+                    return (b[0] - a[0] != 0 ? b[0] - a[0] : a[1].localeCompare(b[1]));
+                } else {
+                    return (a[1].localeCompare(b[1]) != 0 ?a[1].localeCompare(b[1]) : b[0] - a[0]);
+                }
+            });
+            
+            // Print the line counts
+            for (var i in sortedLines) {
+                if(format == 'csv') {
+                    outputString = outputString + sortedLines[i][0] + ',"' + sortedLines[i][1].replace('"', '""') + '"' + "\n";
+                } else {
+                    strToPrint = '' + zeroPad(sortedLines[i][0], 8, " ");
+                    strToPrint += ' | ' + sortedLines[i][1] + '';
+                    outputString = outputString + strToPrint + "\n";
+                }
+            }
+            
+            // Print total character count
+            if (format == 'csv') {
+                outputString = outputString + countLines + ",TOTAL LINES" + "\n";
+            } else {
+                outputString = outputString + "-----------------------------------------------------" + "\n";
+                outputString = outputString + zeroPad(countLines, 8, " ") + " | TOTAL LINES" + "\n";
+            }
+            
+            return outputString;
+        }
+        
+        // theString = str to be padded
+        // outLength = length you want the final output
+        // padChar = character to use as padding
+        function zeroPad(theString, outLength, padChar) {
+            theString = theString.toString();
+            while (theString.length < outLength) {
+                theString = padChar + theString;
+            }
+            return theString;
+        }
+        
+    </script>
+    
+</body>
+</html>
