@@ -158,8 +158,7 @@ tagCount;
 getLineCounts(jQuery(xml).find('product').get().map(function (element) {return (jQuery(element).find('product_id').text());}).join('\n'), 0);
 
 --------------------------------------------------------------------------------------------------------------------------------
-
-<span style="color: green; font-weight: bold;">// general "filter & count how many" template script (in this spicific case, it is to filter out any products that have the string "13098" in their "PRODUCTID" tag, and then filter out which one of those don't have a populated "variant_id" tag - then the results are displayed by their name, sorted by line instance occurance (in case there are many with the same value)):</span>
+<span style="color: green; font-weight: bold;">// general "filter & count how many" template script (in this spicific case, it is to filter out any products that have the string "13098" in their "PRODUCTID" tag, and then filter out which one of those don't have a populated "variant_id" tag - then the results are displayed by their name, sorted by how many line instances occur in the output (in case there are many with the same value)). (Note: the second argument to getLineCounts govern the sorting basis - if 0 is passed, it sorts from highest number of occurances to lowest, while for any other value, it displays the lines in the order they appear (no-sorting).):</span>
 getLineCounts (
     jQuery(xml).find('product').get() // get all products
         .filter(function (element) { // filter step 1
